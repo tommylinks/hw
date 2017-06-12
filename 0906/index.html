@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<body>
+	
+	<table id="currency">
+
+	</table>
+
+
+	<script>
+		
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET','https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5', false);
+	xhr.send();
+
+
+	var api = JSON.parse(xhr.responseText);
+
+	// console.log(api[2].buy);
+
+
+var currency = document.getElementById('currency');
+
+
+for (var i = 0; i < api.length; i++) {
+currency.innerHTML += `
+	<tr>
+		<td>${api[i].ccy}</td>
+		<td>${api[i].buy}</td>
+	</tr>` ;
+
+}
+
+
+	</script>
+</body>
+</html>
