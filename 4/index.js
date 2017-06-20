@@ -1,71 +1,53 @@
-// var user = {
-// 	getName: function(name) {
-// 		console.log(name);
-// 		return this;
-// 	},
-// 	getCode: function(code) {
-// 		console.log(code);
-// 		return this;
-// 	}
-// };
-
-// user.getName('dima').getCode(123);
-
-
-
-
-
-
-
-
-
-// var http = require('http');
-const EventEmitter = require('events');
-const myEmitter = new EventEmitter();
-
-
-// var server = http.createServer();
-
-// server.on('test', function(request, response) {
-// 	response.write('content here....');
-// 	console.log('lol');
-// 	response.end();
-
-// 	console.log( 'method: ' + request.method);
-// 	console.log('host: ' + request.headers.host);
-
-// });
-
-
-
-// server.listen({
-//   port: 7000
-// });
-
 
 var http = require('http');
- 
+var https = require('https');
+var EventEmitter = require('events');
+var myEmitter = new EventEmitter();
+var url = require('url');
+var api = "";
 
- 
-var server = http.createServer();
-server.once('request', function(request, response) {
-    response.writeHead(200);
-		console.log( 'method: ' + request.method);
-		console.log('host: ' + request.headers.host);
-    response.write('hi');
-    response.end();
+
+https.get('https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5', function(info) {
+    info.setEncoding('utf8');
+    info.on('data', function (body) {
+
+        var apiObj = JSON.parse(body);
+        for (var i = 0; i < apiObj.length; i++) {
+            api += apiObj[i].ccy + " : " + apiObj[i].buy + "\n";
+        }
+        return api;
+
+    });
+
 });
- 
-server.listen(8000);
-console.log('Browse to http://127.0.0.1:8000');
 
-  	
+var server = http.createServer();
 
-myEmitter.on('listening', () => {
+server.on('request', function(req, res) {
+
+    var parseUrl = url.parse(req.url, true);
+
+    if(parseUrl.pathname == '/about') {
+        console.log('URL: ' + req.url);
+        console.log('Method: ' + req.method);
+        console.log('Status: ' + res.statusCode);
+    } else if (parseUrl.pathname == '/stop') {
+        server.close();
+        console.log('server stoped');
+    } else if (parseUrl.pathname == '/currency') {
+        res.write(api);
+    }
+
+    res.end();
+});
+
+server.listen(3000);
+
+myEmitter.on('listening', function(){
   console.log( 'Listen port: ' + server.address().port );
 });
-
 myEmitter.emit('listening');
+
 
 
 
